@@ -8,7 +8,7 @@ def main():
 
 @app.route('/index')
 def index():
-  return render_template('index.html')
+  return render_template('Scatter_charts.html')
 
 if __name__ == '__main__':
   app.run(port=33507)
