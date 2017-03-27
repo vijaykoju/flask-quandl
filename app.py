@@ -96,5 +96,4 @@ def polynomial():
 	return encode_utf8(html)
 
 if __name__ == "__main__":
-	print(__doc__)
-	app.run(host='0.0.0.0')
+	app.run(port=33507)
