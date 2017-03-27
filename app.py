@@ -8,15 +8,18 @@ in this directory, and navigate to:
 from __future__ import print_function
 
 import flask
+import requests
+import numpy as np
+import pandas as pd
 
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
 import datetime
-import quandl
+# import quandl
 
-quandl.ApiConfig.api_key = 'dvzXzx3iSej1nbvhG_HU'
+# quandl.ApiConfig.api_key = 'dvzXzx3iSej1nbvhG_HU'
 
 app = flask.Flask(__name__)
 
@@ -57,15 +60,20 @@ def polynomial():
 		sd = str(last_month)
 		ed = str(today.month)
 
-	start_date = str(today.year)+'-'+sd+'-'+'01'
-	end_date= str(today.year)+'-'+ed+'-'+'01'
+	start_date = str(today.year)+sd+'01'
+	end_date= str(today.year)+ed+'01'
 	
-	data = quandl.get_table('WIKI/PRICES', paginate=True, ticker=[ticker], date={'gte': start_date, 'lt': end_date}, qopts={'columns':['ticker', 'date', 'close']})
+	req = 'https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?date.gte='+start_date+'&date.lt='+end_date+'&ticker='+ticker+'&qopts.columns=date,close&api_key=dvzXzx3iSej1nbvhG_HU'
+	r = requests.get(req)
+	data = pd.DataFrame(np.array(r.json()['datatable']['data']))
+	data[0] = pd.to_datetime(data[0])
+	# data = quandl.get_table('WIKI/PRICES', paginate=True, ticker=[ticker], date={'gte': start_date, 'lt': end_date}, qopts={'columns':['ticker', 'date', 'close']})
 
 	# Create a polynomial line graph with those arguments
 	# x = list(range(_from, to + 1))
-	x = data['date']
-	y = data['close']
+	x = data[0]
+	y = data[1]
+	print(x)
 	fig = figure(title=ticker+' closing stock of last month', x_axis_type='datetime')
 	# fig.line(x, [i ** 2 for i in x], color=colors[color], line_width=2)
 	fig.line(x, y, color=colors[color], line_width=1)
@@ -89,5 +97,4 @@ def polynomial():
 
 if __name__ == "__main__":
 	print(__doc__)
-	app.run(port=33507)
-	#app.run(host='0.0.0.0')
+	app.run(host='0.0.0.0')
