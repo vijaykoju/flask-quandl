@@ -1,9 +1,5 @@
-'''This example demonstrates embedding a standalone Bokeh document
-into a simple Flask application, with a basic HTML web form.
-To view the example, run:
-    python simple.py
-in this directory, and navigate to:
-    http://localhost:5000
+'''
+App to plot quandl stock closing data of last month
 '''
 from __future__ import print_function
 
@@ -17,9 +13,6 @@ from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
 import datetime
-# import quandl
-
-# quandl.ApiConfig.api_key = 'dvzXzx3iSej1nbvhG_HU'
 
 app = flask.Flask(__name__)
 
@@ -37,17 +30,12 @@ def getitem(obj, item, default):
 		return obj[item]
 
 @app.route("/")
-def polynomial():
-	""" Very simple embedding of a polynomial chart
-	"""
-	
+def plot_quandl():
 	# Grab the inputs arguments from the URL
 	args = flask.request.args
 	
 	# Get all the form arguments in the url with defaults
 	color = getitem(args, 'color', 'Black')
-	# _from = int(getitem(args, '_from', 0))
-	# to = int(getitem(args, 'to', 10))
 	ticker = getitem(args, 'ticker', 'GOOG')
 	
 	today = datetime.date.today()
@@ -63,19 +51,15 @@ def polynomial():
 	start_date = str(today.year)+sd+'01'
 	end_date= str(today.year)+ed+'01'
 	
-	req = 'https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?date.gte='+start_date+'&date.lt='+end_date+'&ticker='+ticker+'&qopts.columns=date,close&api_key=dvzXzx3iSej1nbvhG_HU'
+	req = 'https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?date.gte='+start_date+'&date.lt='+end_date+'&ticker='+ticker+'&qopts.columns=date,close&api_key=your_quandl_api_key_here'
 	r = requests.get(req)
 	data = pd.DataFrame(np.array(r.json()['datatable']['data']))
 	data[0] = pd.to_datetime(data[0])
-	# data = quandl.get_table('WIKI/PRICES', paginate=True, ticker=[ticker], date={'gte': start_date, 'lt': end_date}, qopts={'columns':['ticker', 'date', 'close']})
 
-	# Create a polynomial line graph with those arguments
-	# x = list(range(_from, to + 1))
 	x = data[0]
 	y = data[1]
 	print(x)
 	fig = figure(title=ticker+' closing stock of last month', x_axis_type='datetime')
-	# fig.line(x, [i ** 2 for i in x], color=colors[color], line_width=2)
 	fig.line(x, y, color=colors[color], line_width=1)
 	
 	js_resources = INLINE.render_js()
@@ -89,8 +73,6 @@ def polynomial():
 		js_resources=js_resources,
 		css_resources=css_resources,
 		color=color,
-		# _from=_from,
-		# to=to,
 		ticker=ticker
 	)
 	return encode_utf8(html)
