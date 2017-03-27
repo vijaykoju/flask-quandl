@@ -83,7 +83,7 @@ def polynomial():
 	
 	script, div = components(fig)
 	html = flask.render_template(
-		'embed.html',
+		'index.html',
 		plot_script=script,
 		plot_div=div,
 		js_resources=js_resources,
